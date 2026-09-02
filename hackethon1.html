@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shield X — Phishing &amp; Scam Detection Tool</title>
+<meta name="description" content="Shield X checks links, messages and screenshots for signs of phishing before you click, reply or share anything.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Single stylesheet — must sit in the SAME folder as this HTML file -->
+<link rel="stylesheet" href="shieldx.css">
+</head>
+<body>
+
+<div class="demo-banner" id="demoBanner">
+  <span class="demo-banner__dot" aria-hidden="true"></span>
+  Demo build — analysis runs on sample logic in your browser. Scores will come from the real detection backend once it's connected.
+  <button class="demo-banner__close" id="demoBannerClose" aria-label="Dismiss notice">&times;</button>
+</div>
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href="#" data-nav="home">
+      <svg class="brand__mark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M13 2L4 6V12.5C4 18.2 7.9 23.3 13 24.5C18.1 23.3 22 18.2 22 12.5V6L13 2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M9.2 13.1L11.7 15.6L16.9 10.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand__name">Shield X</span>
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+      <button class="main-nav__link is-active" data-nav="home">Scanner</button>
+      <button class="main-nav__link" data-nav="history">History</button>
+      <button class="main-nav__link" data-nav="dashboard">Dashboard</button>
+      <button class="main-nav__link" data-nav="awareness">Awareness</button>
+    </nav>
+
+    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="mainContent">
+
+  <!-- ============ HOME / SCANNER ============ -->
+  <section class="view is-active" id="view-home" data-view="home">
+    <div class="container">
+
+      <div class="hero">
+        <h1 class="hero__title">Check it before you click, reply, or download.</h1>
+        <p class="hero__subtitle">Paste a link, a suspicious message, or upload a screenshot. Shield X breaks down the warning signs and tells you what to do next.</p>
+      </div>
+
+      <div class="scanner-card">
+        <div class="scanner-tabs" role="tablist" aria-label="Scan type">
+          <button class="scanner-tabs__btn is-active" role="tab" aria-selected="true" data-tab="url">Link</button>
+          <button class="scanner-tabs__btn" role="tab" aria-selected="false" data-tab="message">Message / Email</button>
+          <button class="scanner-tabs__btn" role="tab" aria-selected="false" data-tab="screenshot">Screenshot</button>
+        </div>
+
+        <!-- URL PANEL -->
+        <div class="scanner-panel is-active" data-panel="url" role="tabpanel">
+          <label class="field-label" for="urlInput">Website or link address</label>
+          <div class="input-row">
+            <input type="text" id="urlInput" class="text-input" placeholder="e.g. http://secure-paypal-verify-account.com" autocomplete="off" spellcheck="false">
+            <button class="btn btn--primary" id="scanUrlBtn">Scan link</button>
+          </div>
+          <p class="field-hint" id="urlHint">Paste the full address, including http:// or https://.</p>
+        </div>
+
+        <!-- MESSAGE PANEL -->
+        <div class="scanner-panel" data-panel="message" role="tabpanel" hidden>
+          <label class="field-label" for="messageInput">Message, email or SMS text</label>
+          <textarea id="messageInput" class="text-area" rows="6" placeholder="Paste the full message here, including sender name if you have it..."></textarea>
+          <div class="input-row input-row--end">
+            <button class="btn btn--primary" id="scanMessageBtn">Scan message</button>
+          </div>
+        </div>
+
+        <!-- SCREENSHOT PANEL -->
+        <div class="scanner-panel" data-panel="screenshot" role="tabpanel" hidden>
+          <label class="field-label" for="screenshotInput">Upload a screenshot</label>
+          <div class="dropzone" id="dropzone" tabindex="0">
+            <input type="file" id="screenshotInput" accept="image/png, image/jpeg, image/webp" hidden>
+            <div class="dropzone__content" id="dropzoneContent">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 16V4M12 4L7 9M12 4l5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <p><strong>Click to upload</strong> or drag a screenshot here</p>
+              <p class="dropzone__meta">PNG, JPG or WEBP. Text is read from the image automatically.</p>
+            </div>
+            <img class="dropzone__preview" id="dropzonePreview" alt="Uploaded screenshot preview" hidden>
+          </div>
+          <p class="field-note">Screenshot reading (OCR) is still in development for this build. Uploads run through a placeholder check so you can see how the result will look.</p>
+          <div class="input-row input-row--end">
+            <button class="btn btn--primary" id="scanScreenshotBtn" disabled>Scan screenshot</button>
+          </div>
+        </div>
+
+        <p class="scanner-error" id="scannerError" hidden></p>
+      </div>
+
+      <div class="how-it-works">
+        <h2 class="section-heading">How a scan works</h2>
+        <ol class="steps">
+          <li class="steps__item">
+            <span class="steps__num">1</span>
+            <div>
+              <h3>Submit content</h3>
+              <p>Paste a link or message, or upload a screenshot of one.</p>
+            </div>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num">2</span>
+            <div>
+              <h3>Automated analysis</h3>
+              <p>Shield X checks it against known phishing patterns and red flags.</p>
+            </div>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num">3</span>
+            <div>
+              <h3>Risk score &amp; reasoning</h3>
+              <p>You get a risk level, a percentage, and the exact indicators found.</p>
+            </div>
+          </li>
+          <li class="steps__item">
+            <span class="steps__num">4</span>
+            <div>
+              <h3>Next step</h3>
+              <p>A plain-language recommendation on what to do about it.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ LOADING ============ -->
+  <section class="view" id="view-loading" data-view="loading">
+    <div class="container loading-view">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <p class="loading-view__text" id="loadingText">Analyzing content&hellip;</p>
+      <ul class="loading-view__steps" id="loadingSteps">
+        <li data-step="0">Parsing input</li>
+        <li data-step="1">Checking against threat patterns</li>
+        <li data-step="2">Scoring risk</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ RESULT ============ -->
+  <section class="view" id="view-result" data-view="result">
+    <div class="container">
+      <button class="back-link" data-nav="home">&larr; New scan</button>
+
+      <div class="result-header" id="resultHeader">
+        <div class="risk-badge" id="riskBadge">
+          <span class="risk-badge__label" id="riskLevelLabel">SAFE</span>
+        </div>
+        <div class="result-header__meta">
+          <p class="result-header__type" id="resultTypeLabel">Link scan</p>
+          <p class="result-header__target" id="resultTarget">example.com</p>
+          <p class="result-header__time" id="resultTime">Scanned just now</p>
+        </div>
+        <div class="risk-score">
+          <div class="risk-score__ring" id="riskScoreRing">
+            <span class="risk-score__value" id="riskScoreValue">0%</span>
+          </div>
+          <span class="risk-score__caption">phishing probability</span>
+        </div>
+      </div>
+
+      <div class="result-grid">
+        <div class="result-panel">
+          <h2 class="result-panel__title">Threat indicators</h2>
+          <p class="result-panel__sub">Signals Shield X checked for in this scan.</p>
+          <ul class="indicator-list" id="indicatorList"></ul>
+        </div>
+
+        <div class="result-panel">
+          <h2 class="result-panel__title">Why it was flagged</h2>
+          <p class="result-panel__sub" id="whyFlaggedIntro">Summary of the analysis.</p>
+          <ul class="reason-list" id="reasonList"></ul>
+        </div>
+      </div>
+
+      <div class="result-panel result-panel--wide">
+        <h2 class="result-panel__title">Analysis breakdown</h2>
+        <div class="breakdown-table" id="breakdownTable"></div>
+      </div>
+
+      <div class="recommendation" id="recommendationBox">
+        <h2 class="result-panel__title">Recommended action</h2>
+        <p id="recommendationText">—</p>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn btn--secondary" data-nav="home">Scan again</button>
+        <button class="btn btn--ghost" id="saveResultBtn" disabled>Saved to history</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section class="view" id="view-history" data-view="history">
+    <div class="container">
+      <div class="page-heading">
+        <h1>Scan history</h1>
+        <p>Every scan run in this browser, stored locally on this device.</p>
+      </div>
+
+      <div class="history-toolbar">
+        <div class="filter-group" role="group" aria-label="Filter by risk level">
+          <button class="filter-chip is-active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="safe">Safe</button>
+          <button class="filter-chip" data-filter="suspicious">Suspicious</button>
+          <button class="filter-chip" data-filter="high">High risk</button>
+        </div>
+        <button class="btn btn--ghost btn--small" id="clearHistoryBtn">Clear history</button>
+      </div>
+
+      <div class="history-list" id="historyList"></div>
+      <p class="empty-state" id="historyEmpty" hidden>No scans yet. Run a scan from the Scanner tab and it will show up here.</p>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="view" id="view-dashboard" data-view="dashboard">
+    <div class="container">
+      <div class="page-heading">
+        <h1>Dashboard</h1>
+        <p>Summary of scans run on this device. <span class="mock-tag">Sample data — will reflect real backend statistics once connected.</span></p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-box">
+          <p class="stat-box__value" id="statTotal">0</p>
+          <p class="stat-box__label">Total scans</p>
+        </div>
+        <div class="stat-box stat-box--safe">
+          <p class="stat-box__value" id="statSafe">0</p>
+          <p class="stat-box__label">Safe</p>
+        </div>
+        <div class="stat-box stat-box--suspicious">
+          <p class="stat-box__value" id="statSuspicious">0</p>
+          <p class="stat-box__label">Suspicious</p>
+        </div>
+        <div class="stat-box stat-box--high">
+          <p class="stat-box__value" id="statHigh">0</p>
+          <p class="stat-box__label">High risk</p>
+        </div>
+      </div>
+
+      <div class="result-panel result-panel--wide">
+        <h2 class="result-panel__title">Scans by type</h2>
+        <div class="bar-chart" id="typeChart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AWARENESS ============ -->
+  <section class="view" id="view-awareness" data-view="awareness">
+    <div class="container">
+      <div class="page-heading">
+        <h1>Cyber awareness</h1>
+        <p>The patterns behind most phishing attempts, and how to spot them quickly.</p>
+      </div>
+
+      <div class="awareness-grid" id="awarenessGrid"></div>
+
+      <div class="quiz-card" id="quizCard">
+        <div class="quiz-card__header">
+          <h2>Quick check: spot the phish</h2>
+          <p id="quizProgress">Question 1 of 5</p>
+        </div>
+        <div id="quizBody"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p>Shield X — built for a campus hackathon. Frontend demo, no data leaves your browser.</p>
+    <p class="site-footer__version">v0.1 · frontend-only build</p>
+  </div>
+</footer>
+
+<script src="js/api.js"></script>
+<script src="js/scanner.js"></script>
+<script src="js/result.js"></script>
+<script src="js/history.js"></script>
+<script src="js/awareness.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
